@@ -98,6 +98,7 @@ node test/e2e/real.mjs    # loads the real extension in headless Brave and check
 node test/e2e/run.mjs     # content-script tests with a stub background
 node test/e2e/debugger.mjs
 node tools/make-icons.mjs # regenerate the icons in icons/
+npm run package           # build dist/script-guard-<version>.zip
 ```
 
 The end-to-end tests expect Brave at `/usr/bin/brave-browser`; set `BRAVE=/path/to/brave` to use another binary.
@@ -116,6 +117,15 @@ docs/             architecture and feasibility notes
 ```
 
 Module interfaces and the event pipeline are described in [docs/architecture.md](docs/architecture.md).
+
+### Releasing
+
+1. Update `CHANGELOG.md` and set the same `version` in `manifest.json` and `package.json`.
+2. Run `npm test`, `node test/e2e/real.mjs` and `npm run package`. The package script refuses to build if the two versions differ or if tests, docs or key files would be included.
+3. Tag and push: `git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z`.
+4. On GitHub, draft a release from that tag, attach the zip, paste the changelog entry, and tick **Set as a pre-release** while it is still being tested.
+
+Install a release by unzipping it and using **Load unpacked** on the unzipped folder. Unpacked extensions do not auto-update.
 
 ### A note on the test pages
 

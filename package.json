@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test \"test/unit/*.test.js\"",
-    "e2e": "node test/e2e/run.mjs && node test/e2e/debugger.mjs"
+    "e2e": "node test/e2e/run.mjs && node test/e2e/debugger.mjs",
+    "package": "node tools/package.mjs"
   },
   "devDependencies": {
     "puppeteer-core": "^25.16.0"
