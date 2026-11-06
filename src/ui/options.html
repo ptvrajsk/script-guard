@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Script Guard settings</title>
+  <link rel="stylesheet" href="ui.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+<div class="shell">
+  <nav class="side" aria-label="Settings sections">
+    <div class="brand">
+      <svg viewBox="0 0 48 56" aria-hidden="true"><path d="M24 3 6 10v16c0 13 8 23 18 27 10-4 18-14 18-27V10L24 3z"/><path d="M16 27l6 6 11-13"/></svg>
+      <span>Script Guard</span>
+    </div>
+    <a href="#sites" data-sec="sites">Sites</a>
+    <a href="#rules" data-sec="rules">Script rules</a>
+    <a href="#blocks" data-sec="blocks">Blocked scripts</a>
+    <a href="#import" data-sec="import">Import from DevTools</a>
+    <a href="#hardening" data-sec="hardening">Browser hardening</a>
+    <a href="#extensions" data-sec="extensions">Extension check</a>
+    <a href="#backup" data-sec="backup">Backup</a>
+    <p class="muted small side-note">Everything is stored in this browser profile. Nothing is sent anywhere.</p>
+  </nav>
+
+  <main class="content">
+    <section id="sec-sites" data-sec="sites">
+      <h1>Sites</h1>
+      <p class="muted">Choose how much protection each site gets. Sites you don't list use the default.</p>
+      <div class="panel row">
+        <label class="field grow">Protection for all other sites
+          <select id="defaultProfile">
+            <option value="trusted">Off</option>
+            <option value="default">Default</option>
+            <option value="strict">Strict</option>
+          </select>
+        </label>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Site</th><th>Protection</th><th>Rewrites scripts</th><th><span class="sr">Actions</span></th></tr></thead>
+          <tbody id="siteRows"></tbody>
+        </table>
+        <div class="row add">
+          <input id="newSite" placeholder="example.com" aria-label="Site to add" class="grow">
+          <select id="newSiteProfile" aria-label="Protection for the new site">
+            <option value="trusted">Off</option><option value="default" selected>Default</option><option value="strict">Strict</option>
+          </select>
+          <button id="addSite" class="primary">Add site</button>
+        </div>
+        <p class="small" id="siteMsg" role="status"></p>
+      </div>
+    </section>
+
+    <section id="sec-rules" data-sec="rules" hidden>
+      <h1>Script rules</h1>
+      <p class="muted">A rule changes a script before it runs, on sites where you've turned on script rewriting. Each change finds a line of text and must match exactly once. If the site updates its script and the text moves, the rule stops and the original script runs.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>On</th><th>Name</th><th>Applies to</th><th>Changes</th><th><span class="sr">Actions</span></th></tr></thead>
+          <tbody id="ruleRows"></tbody>
+        </table>
+      </div>
+      <div class="panel stack">
+        <h2>Add or edit a rule</h2>
+        <textarea id="ruleJson" spellcheck="false" aria-label="Rule as JSON" placeholder='{"name":"Remove ad loader","urlPattern":"https://example.com/js/ads.js","ops":[{"type":"replace","find":"loadAds()","replace":"/* loadAds() */"}]}'></textarea>
+        <div class="row">
+          <input id="testUrl" class="grow" placeholder="Address of the script to test against" aria-label="Script address to test">
+          <button id="testRule">Test</button>
+          <button id="saveRule" class="primary">Save rule</button>
+        </div>
+        <p class="small" id="ruleMsg" role="status"></p>
+        <pre id="ruleOut" hidden></pre>
+      </div>
+    </section>
+
+    <section id="sec-blocks" data-sec="blocks" hidden>
+      <h1>Blocked scripts</h1>
+      <p class="muted">Requests to these scripts and hosts are stopped before they leave your browser. Add blocks from the toolbar popup while you are on a page, or enter one here. Blocking a host also blocks its subdomains. Reload a page after changing a block.</p>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Type</th><th>Blocked</th><th>Added</th><th><span class="sr">Actions</span></th></tr></thead>
+          <tbody id="blockRows"></tbody>
+        </table>
+      </div>
+      <div class="panel stack">
+        <h2>Add a block</h2>
+        <div class="row">
+          <select id="newBlockKind" aria-label="What to block">
+            <option value="host">Whole host</option>
+            <option value="url">One script address</option>
+          </select>
+          <input id="newBlock" class="grow" placeholder="ads.example.net" aria-label="Host or script address to block" autocomplete="off" spellcheck="false">
+          <button id="addBlock" class="primary">Add block</button>
+        </div>
+        <p class="small msg" id="blockMsg" role="status"></p>
+      </div>
+    </section>
+
+    <section id="sec-import" data-sec="import" hidden>
+      <h1>Import from DevTools</h1>
+      <p class="muted">Edit a script with Local Overrides in DevTools until the page behaves, then choose that overrides folder here. For each saved file, Script Guard fetches the live original, works out what you changed, and offers it as a rule. The folder is only read, never changed.</p>
+      <div class="panel stack">
+        <button id="pickDir" class="primary">Choose overrides folder</button>
+        <input type="file" id="dirInput" webkitdirectory hidden>
+        <p class="muted small">Pick the folder DevTools shows under Sources → Overrides. Your browser will say it is uploading the folder; nothing is sent anywhere, the files are only read.</p>
+        <p class="small" id="importMsg" role="status"></p>
+        <div id="importList"></div>
+      </div>
+    </section>
+
+    <section id="sec-hardening" data-sec="hardening" hidden>
+      <h1>Browser hardening</h1>
+      <p class="muted">An extension can't change these settings, and they protect you against attacks on the browser itself, which nothing in this extension can stop. Check each one against your Brave version.</p>
+      <div class="panel">
+        <ul class="check">
+          <li><strong>Keep Brave updated.</strong> Open <code>brave://settings/help</code> and restart after each update.</li>
+          <li><strong>Shields on Aggressive.</strong> Open <code>brave://settings/shields</code>.</li>
+          <li><strong>Keep site isolation on.</strong> Search for it in <code>brave://flags</code>.</li>
+          <li><strong>Turn off JIT for untrusted sites</strong> if your version offers it. Look in <code>brave://settings/security</code>.</li>
+          <li><strong>Block USB, HID, serial and Bluetooth by default.</strong> Open <code>brave://settings/content</code>.</li>
+          <li><strong>Block notifications and pop-ups by default.</strong> Same page.</li>
+          <li><strong>Never paste a command from a web page</strong> into Win+R, a terminal or PowerShell.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="sec-extensions" data-sec="extensions" hidden>
+      <h1>Extension check</h1>
+      <p class="muted">Lists your other extensions, with the ones that can read every site or change your browser first.</p>
+      <div class="panel stack">
+        <button id="runAudit">Scan installed extensions</button>
+        <table id="auditTable" hidden>
+          <thead><tr><th>Extension</th><th>What it can do</th><th>Version</th></tr></thead>
+          <tbody id="auditRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="sec-backup" data-sec="backup" hidden>
+      <h1>Backup</h1>
+      <p class="muted">Save your settings and rules to a file, or restore them. Restored rules start switched off until you review them.</p>
+      <div class="panel stack">
+        <div class="row"><button id="export">Save backup</button><button id="importFile">Restore from file…</button><input type="file" id="importInput" accept="application/json" hidden></div>
+        <p class="small" id="backupMsg" role="status"></p>
+      </div>
+    </section>
+  </main>
+</div>
+<script type="module" src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!doctype html><meta charset="utf-8"><title>Forged config and event flood</title>
+<body><button id="go">go</button>
+<script>
+// Adversarial: before the real relay config can arrive, forge a "default / everything off" config
+// (twice), then flood the relay directly with fake events and a page-chosen frameUrl.
+const r = (window.__result = {});
+const loose = { __sg: 1, dir: 'relay->page', type: 'config', profile: 'default', hooks: { download: 'off', clipboard: 'off' } };
+window.postMessage(loose, '*');
+setTimeout(() => window.postMessage(loose, '*'), 50);
+for (let i = 0; i < 40; i++) window.postMessage({ __sg: 1, dir: 'page->relay', type: 'event', kind: 'worker', action: 'logged', detail: { n: i, big: 'x'.repeat(5000) }, frameUrl: 'https://forged.test/', t: Date.now() }, '*');
+function mk(name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['MZ'], { type: 'application/octet-stream' }));
+  a.download = name; return a;
+}
+// after the real (strict) config has arrived: an unattended download click must still be blocked
+setTimeout(() => {
+  const l = mk('late.exe'); r.late = false; l.addEventListener('click', () => { r.late = true; }); l.click();
+  window.__done = true;
+}, 1200);
+</script>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Script Guard</title>
+  <link rel="stylesheet" href="ui.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="top">
+    <svg id="shield" class="shield" data-state="default" viewBox="0 0 48 56" aria-hidden="true">
+      <path class="shield-body" d="M24 3 6 10v16c0 13 8 23 18 27 10-4 18-14 18-27V10L24 3z"/>
+      <path class="shield-mark" d="M16 27l6 6 11-13"/>
+    </svg>
+    <div class="grow">
+      <div id="site" class="site" title="">Loading…</div>
+      <div id="state" class="state" aria-live="polite"></div>
+    </div>
+    <button id="openOptions" class="quiet" title="Open settings" aria-label="Open settings">Settings</button>
+  </header>
+
+  <main id="main">
+    <fieldset class="seg-wrap" id="segWrap">
+      <legend class="sr">Protection for this site</legend>
+      <div class="seg" role="radiogroup" aria-label="Protection for this site">
+        <label><input type="radio" name="profile" value="trusted"><span>Off</span></label>
+        <label><input type="radio" name="profile" value="default"><span>Default</span></label>
+        <label><input type="radio" name="profile" value="strict"><span>Strict</span></label>
+      </div>
+    </fieldset>
+    <p id="profileHelp" class="muted small help"></p>
+    <div id="reloadBar" class="reload" hidden>
+      <span>Reload this tab to apply the change.</span>
+      <button id="reload" class="primary">Reload</button>
+    </div>
+
+    <section class="block" id="scriptsBlock">
+      <div class="row between">
+        <h2>Scripts on this page</h2>
+        <span id="scriptsCount" class="muted small"></span>
+      </div>
+      <p id="scriptsNote" class="muted small"></p>
+      <p id="scriptsMsg" class="small msg" role="status"></p>
+      <ul id="scripts" class="scripts"></ul>
+      <button id="showAll" class="quiet small" hidden></button>
+    </section>
+
+    <section class="block">
+      <label class="switch">
+        <input type="checkbox" id="dbg" role="switch">
+        <span>
+          <strong>Rewrite scripts on this site</strong>
+          <span class="muted small d">Applies your saved rules to this site's scripts. The browser will show a banner saying it is being debugged.</span>
+        </span>
+      </label>
+      <p id="dbgStatus" class="small" role="status"></p>
+      <div id="rewrite" class="rewrite" hidden>
+        <div class="row between"><h2>Rewrites on this tab</h2><span id="rewriteCount" class="pill"></span></div>
+        <p id="rewriteSummary" class="small muted"></p>
+        <ul id="rewriteList" class="rewrites"></ul>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="row between">
+        <h2>Activity on this tab</h2>
+        <button id="clear" class="quiet small">Clear</button>
+      </div>
+      <p id="summary" class="muted small"></p>
+      <ul id="events" class="events"></ul>
+    </section>
+
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

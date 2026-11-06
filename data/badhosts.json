@@ -1,0 +1,20 @@
+{
+  "badHosts": [
+    "bootcss.com",
+    "polyfill.io"
+  ],
+  "updatedAt": "2026-11-05T00:00:00Z",
+  "source": "Seed list from the June 2024 polyfill.io / Funnull supply-chain reporting (Sansec, Cloudflare, Censys). Matches the registrable domain and all subdomains.",
+  "verify": [],
+  "candidates": [
+    "bootcdn.net",
+    "newcrbpc.com",
+    "polyfill.com",
+    "staticfile.net",
+    "staticfile.org",
+    "union.macoms.la",
+    "unionadjs.com",
+    "xhsbpza.com"
+  ],
+  "note": "badHosts is blocked by default. candidates are NOT blocked: they need verification (bootcdn.net and staticfile.org are widely used legitimate CDNs and blocking them breaks sites). Move an entry into badHosts only after checking current reporting."
+}

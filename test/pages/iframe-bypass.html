@@ -1,0 +1,46 @@
+<!doctype html><meta charset="utf-8"><title>Fresh-iframe native grab</title>
+<body>
+<script>
+// Adversarial: try to reach pristine natives through fresh frames. Each variant calls Function with a unique marker
+// string; the e2e harness checks which markers the hooks saw (via the relay) and, for the ClickFix
+// payload, whether the clipboard was changed. Workers cannot be probed this way (see report).
+const cmd = 'powershell -enc SQBFAFgA';
+const r = (window.__result = { variants: {} });
+function frame(attrs) { const f = document.createElement('iframe'); for (const k in attrs) f.setAttribute(k, attrs[k]); return f; }
+
+// 1. fresh about:blank iframe, call its natives from the parent realm
+document.body.appendChild(frame({})).contentWindow.Function('return "probe:blank-from-parent"')();
+const f1 = document.body.appendChild(frame({}));
+// 2. document.open() on it (keeps the same window, so hooks should survive)
+// Known gap: document.open() erases the relay's listener, so events stop reaching the background
+// from this frame. Enforcement (patched natives) must still hold: verified via setData below.
+f1.contentDocument.open();
+f1.contentDocument.addEventListener('copy', e => {
+  e.clipboardData.setData('text/plain', cmd); r.afterOpenStored = e.clipboardData.getData('text/plain'); e.preventDefault();
+});
+// Synthetic copy event (execCommand('copy') needs focus/selection in the frame). The hook only needs
+// the event's DataTransfer to be the one it saw in its capture listener.
+f1.contentDocument.dispatchEvent(new f1.contentWindow.ClipboardEvent('copy', { clipboardData: new f1.contentWindow.DataTransfer(), cancelable: true }));
+f1.contentDocument.close();
+// 3. srcdoc
+document.body.appendChild(frame({ srcdoc: '<script>Function("return \\"probe:srcdoc\\"")()<\/script>' }));
+// 4. sandboxed srcdoc
+document.body.appendChild(frame({ sandbox: 'allow-scripts', srcdoc: '<script>Function("return \\"probe:sandbox-srcdoc\\"")()<\/script>' }));
+// 5. data: URL (opaque origin)
+document.body.appendChild(frame({ src: 'data:text/html,<script>Function("return \\"probe:data-url\\"")()<\/script>' }));
+// 6. blob: URL
+const u = URL.createObjectURL(new Blob(['<script>Function("return \\"probe:blob-url\\"")()<\/script>'], { type: 'text/html' }));
+document.body.appendChild(frame({ src: u }));
+// 7. javascript: URL iframe
+document.body.appendChild(frame({ src: 'javascript:Function("return \\"probe:js-url\\"")()' }));
+// 8. the actual ClickFix write from a fresh iframe, via its own clipboard object
+const f8 = document.body.appendChild(frame({ allow: 'clipboard-write' }));
+document.getElementById && (window.__attack = async () => {
+  await navigator.clipboard.writeText('sentinel');
+  r.iframeWrite = await f8.contentWindow.navigator.clipboard.writeText(cmd).then(() => 'ok', e => 'rejected:' + e.name);
+  r.clipboard = await navigator.clipboard.readText().catch(e => 'readfail:' + e.name);
+  r.leaked = r.clipboard.includes('powershell');
+  window.__done = true;
+});
+</script>
+<button id="go" onclick="__attack()">go</button>

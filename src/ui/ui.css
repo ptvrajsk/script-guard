@@ -1,0 +1,79 @@
+/* Script Guard UI. Tokens first; dark mode follows the system unless data-theme is set. */
+:root {
+  --bg: #f2f5f7; --surface: #ffffff; --ink: #12202b; --steel: #5a6b7a; --line: #d5dde4; --wash: #e8edf1;
+  --guard: #0f7b6c; --guard-wash: #dff1ed; --amber: #b7791f; --amber-wash: #f8ecd6;
+  --block: #b3261e; --block-wash: #f9e1de; --focus: #2457d6; --off: #6b7885;
+  --radius: 10px; --radius-sm: 6px;
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1a22; --surface: #16242f; --ink: #e3ebf1; --steel: #8ca0b1; --line: #263847; --wash: #1c2d3a;
+    --guard: #4cc9b0; --guard-wash: #12332f; --amber: #e8b04b; --amber-wash: #3a2f17;
+    --block: #ff8f85; --block-wash: #3d1f1d; --focus: #8fb0ff; --off: #8ca0b1;
+  }
+}
+* { box-sizing: border-box; }
+html { color-scheme: light dark; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 var(--font); }
+h1, h2, h3 { margin: 0; line-height: 1.25; font-weight: 650; }
+h1 { font-size: 20px; } h2 { font-size: 16px; } h3 { font-size: 14px; }
+p { margin: 0 0 8px; max-width: 68ch; }
+a { color: var(--focus); }
+code, pre, .mono { font-family: var(--mono); font-size: 12px; }
+.muted { color: var(--steel); }
+.small { font-size: 12px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Controls */
+button, select, input, textarea { font: inherit; color: inherit; }
+button, select, input[type="text"], input:not([type]), textarea {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 10px;
+}
+button { cursor: pointer; min-height: 32px; }
+button:hover:not(:disabled) { border-color: var(--steel); }
+button.primary { background: var(--guard); color: #fff; border-color: transparent; font-weight: 600; }
+:root[data-theme="dark"] button.primary, :root:not([data-theme="light"]) button.primary { color: #06201b; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) button.primary { color: #fff; } }
+button.quiet { background: transparent; border-color: transparent; color: var(--steel); }
+button.quiet:hover:not(:disabled) { color: var(--ink); background: var(--wash); border-color: transparent; }
+button.danger { color: var(--block); }
+button:disabled { opacity: .5; cursor: default; }
+textarea { width: 100%; min-height: 150px; font-family: var(--mono); font-size: 12px; resize: vertical; }
+label.field { display: grid; gap: 4px; }
+
+/* Segmented control: real radio inputs underneath, so keyboard and screen readers work. */
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--wash); border-radius: var(--radius); padding: 3px; gap: 3px; }
+.seg label { position: relative; text-align: center; }
+.seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.seg span { display: block; padding: 7px 4px; border-radius: 8px; font-weight: 600; color: var(--steel); transition: background .12s, color .12s; }
+.seg input:checked + span { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.18); }
+.seg input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 1px; }
+.seg input:disabled + span { opacity: .5; }
+
+/* Switch */
+.switch { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.switch input { appearance: none; flex: none; width: 34px; height: 20px; border-radius: 999px; background: var(--line); position: relative; margin: 2px 0 0; cursor: pointer; transition: background .12s; border: 0; padding: 0; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .12s; }
+.switch input:checked { background: var(--guard); }
+.switch input:checked::after { transform: translateX(14px); }
+.switch input:disabled { opacity: .5; cursor: default; }
+
+/* Status pills (colour is never the only signal: each has text) */
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--wash); color: var(--steel); }
+.pill.blocked { background: var(--block-wash); color: var(--block); }
+.pill.logged, .pill.warn { background: var(--amber-wash); color: var(--amber); }
+.pill.allowed { background: var(--guard-wash); color: var(--guard); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-weight: 600; color: var(--steel); font-size: 12px; }
+th, td { padding: 8px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+td.empty, .empty { color: var(--steel); padding: 14px 8px; text-align: center; }
+pre { margin: 6px 0; padding: 10px; background: var(--wash); border-radius: var(--radius-sm); overflow: auto; max-height: 280px; white-space: pre-wrap; word-break: break-word; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.row.between { justify-content: space-between; flex-wrap: nowrap; }
+.grow { flex: 1; min-width: 0; }
+.stack > * + * { margin-top: 10px; }

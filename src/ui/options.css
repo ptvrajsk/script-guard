@@ -1,0 +1,36 @@
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.shell { display: grid; grid-template-columns: 230px minmax(0, 1fr); min-height: 100vh; }
+.side { position: sticky; top: 0; align-self: start; height: 100vh; padding: 20px 14px; background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; margin: 0 8px 18px; }
+.brand svg { width: 22px; height: 26px; }
+.brand path:first-child { fill: var(--guard-wash); stroke: var(--guard); stroke-width: 3; stroke-linejoin: round; }
+.brand path:last-child { fill: none; stroke: var(--guard); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.side a { padding: 8px 10px; border-radius: var(--radius-sm); color: var(--steel); text-decoration: none; font-weight: 550; }
+.side a:hover { background: var(--wash); color: var(--ink); }
+.side a[aria-current="page"] { background: var(--guard-wash); color: var(--guard); }
+.side-note { margin: auto 8px 0; }
+
+.content { padding: 28px 32px 48px; max-width: 880px; }
+.content section > h1 { margin-bottom: 6px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin: 14px 0; }
+.panel table { margin: -6px 0 0; }
+.panel .add { margin-top: 12px; }
+.card { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; margin: 10px 0; background: var(--bg); }
+.check { list-style: none; margin: 0; padding: 0; }
+.check li { padding: 10px 0 10px 28px; border-bottom: 1px solid var(--line); position: relative; }
+.check li:last-child { border-bottom: 0; }
+.check li::before { content: ""; position: absolute; left: 4px; top: 14px; width: 12px; height: 12px; border: 2px solid var(--guard); border-radius: 3px; }
+select { max-width: 100%; }
+td select { min-width: 110px; }
+
+@media (max-width: 720px) {
+  .shell { grid-template-columns: 1fr; }
+  .side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--line); padding: 12px; }
+  .brand { width: 100%; margin: 0 4px 6px; }
+  .side-note { display: none; }
+  .content { padding: 18px 16px 40px; }
+}
+
+.msg:empty { display: none; }
+.msg.error { color: var(--block); }
+.mono { font-family: var(--mono); font-size: 12px; }

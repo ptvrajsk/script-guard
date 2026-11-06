@@ -1,0 +1,15 @@
+{
+  "name": "script-guard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Manifest V3 browser extension that hardens what web pages can do with JavaScript.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/unit/*.test.js\"",
+    "e2e": "node test/e2e/run.mjs && node test/e2e/debugger.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.16.0"
+  }
+}

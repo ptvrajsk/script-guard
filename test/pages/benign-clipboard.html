@@ -1,0 +1,15 @@
+<!doctype html><meta charset="utf-8"><title>Benign clipboard</title>
+<body><button id="go">Copy order number</button>
+<script>
+// Must NOT be blocked: copies harmless text through all three paths.
+const r = (window.__result = {});
+document.getElementById('go').addEventListener('click', async () => {
+  r.writeText = await navigator.clipboard.writeText('Order #1234').then(() => 'ok', e => 'rejected:' + e.name);
+  const ta = document.createElement('textarea'); ta.value = 'Invoice 99'; document.body.appendChild(ta);
+  ta.focus(); ta.select(); r.execCommand = document.execCommand('copy'); ta.remove();
+  document.addEventListener('copy', e => { e.clipboardData.setData('text/plain', 'from copy handler'); e.preventDefault(); });
+  r.copyEvent = document.execCommand('copy');
+  r.clipboard = await navigator.clipboard.readText().catch(e => 'readfail:' + e.name);
+  window.__done = true;
+});
+</script>

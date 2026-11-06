@@ -1,0 +1,26 @@
+<!doctype html><meta charset="utf-8"><title>Forced download</title>
+<body><button id="go">Legit download (user click)</button>
+<script>
+// Adversarial: two scripted downloads with no user activation, plus one inside a real click handler.
+const r = (window.__result = { autoClick: false, autoDispatch: false, gestureClick: false });
+function mk(name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['MZ fake payload'], { type: 'application/octet-stream' }));
+  a.download = name; return a;
+}
+const a1 = mk('update.exe'); a1.addEventListener('click', () => { r.autoClick = true; });
+a1.click();                                           // auto-click, blob URL
+const a2 = mk('invoice.hta'); a2.addEventListener('click', () => { r.autoDispatch = true; });
+a2.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));  // synthetic click
+document.getElementById('go').addEventListener('click', () => {
+  const a3 = mk('report.pdf'); a3.addEventListener('click', () => { r.gestureClick = true; });
+  a3.click(); window.__gestureDone = true;
+});
+// Second round after the relay's config has arrived (profile-dependent: strict blocks, default logs).
+setTimeout(() => {
+  const l1 = mk('late.exe'); l1.addEventListener('click', () => { r.lateClick = true; }); l1.click();
+  const l2 = mk('late2.hta'); l2.addEventListener('click', () => { r.lateDispatch = true; });
+  l2.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+  window.__done = true;
+}, 1200);
+</script>

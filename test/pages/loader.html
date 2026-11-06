@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><title>eval / document.write loader</title>
+<body>
+<script>
+// Typical obfuscated-loader primitives. In log/warn mode they must still run (hooks observe only).
+const r = (window.__result = {});
+r.func = new Function('a', 'return a*3')(4);
+r.ctorViaProto = (function () {}).constructor('return 7')();
+setTimeout("window.__result.timerString = 'ran'", 10);
+document.write('<script>window.__result.docWrite = "ran"<\/script>');
+setTimeout(() => { window.__done = true; }, 300);
+</script>
